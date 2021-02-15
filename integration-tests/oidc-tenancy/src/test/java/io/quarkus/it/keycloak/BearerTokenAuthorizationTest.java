@@ -11,6 +11,7 @@ import java.time.Duration;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.keycloak.representations.AccessTokenResponse;
 
@@ -31,6 +32,7 @@ import io.vertx.core.json.JsonObject;
  */
 @QuarkusTest
 @QuarkusTestResource(KeycloakRealmResourceManager.class)
+@Disabled("Vert.x 4 Integration in progress - https://github.com/quarkusio/quarkus/issues/15084")
 public class BearerTokenAuthorizationTest {
 
     private static final String KEYCLOAK_SERVER_URL = System.getProperty("keycloak.url", "http://localhost:8180/auth");
