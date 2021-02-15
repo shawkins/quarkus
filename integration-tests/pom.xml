@@ -63,6 +63,7 @@
         <module>hibernate-orm-envers</module>
         <module>vertx-http</module>
         <module>vertx-web</module>
+        <module>vertx-web-jackson</module>
         <module>vertx</module>
         <module>spring-di</module>
         <module>spring-web</module>
