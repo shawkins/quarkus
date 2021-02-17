@@ -1,5 +1,6 @@
 package io.quarkus.runtime.configuration;
 
+import static io.smallrye.config.PropertiesConfigSourceProvider.classPathSources;
 import static io.smallrye.config.SmallRyeConfigBuilder.META_INF_MICROPROFILE_CONFIG_PROPERTIES;
 import static io.smallrye.config.SmallRyeConfigBuilder.WEB_INF_MICROPROFILE_CONFIG_PROPERTIES;
 
@@ -35,7 +36,6 @@ import org.eclipse.microprofile.config.spi.ConfigSourceProvider;
 import org.jboss.logging.Logger;
 
 import io.smallrye.config.ProfileConfigSourceInterceptor;
-import io.smallrye.config.PropertiesConfigSourceProvider;
 import io.smallrye.config.SmallRyeConfigBuilder;
 
 /**
@@ -82,10 +82,8 @@ public final class ConfigUtils {
             builder.addDefaultSources();
         } else {
             final List<ConfigSource> sources = new ArrayList<>();
-            sources.addAll(new PropertiesConfigSourceProvider(META_INF_MICROPROFILE_CONFIG_PROPERTIES, classLoader)
-                    .getConfigSources(classLoader));
-            sources.addAll(new PropertiesConfigSourceProvider(WEB_INF_MICROPROFILE_CONFIG_PROPERTIES, classLoader)
-                    .getConfigSources(classLoader));
+            sources.addAll(classPathSources(META_INF_MICROPROFILE_CONFIG_PROPERTIES, classLoader));
+            sources.addAll(classPathSources(WEB_INF_MICROPROFILE_CONFIG_PROPERTIES, classLoader));
             sources.add(new EnvConfigSource());
             sources.add(new SysPropConfigSource());
             builder.withSources(sources);
