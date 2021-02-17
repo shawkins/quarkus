@@ -19,8 +19,7 @@ public class VertxGraphqlRecorder {
         return new Handler<RoutingContext>() {
             @Override
             public void handle(RoutingContext event) {
-                if (event.normalisedPath().length() == path.length()) {
-
+                if (event.normalizedPath().length() == path.length()) {
                     event.response().setStatusCode(302);
                     event.response().headers().set(HttpHeaders.LOCATION, path + "/");
                     event.response().end();

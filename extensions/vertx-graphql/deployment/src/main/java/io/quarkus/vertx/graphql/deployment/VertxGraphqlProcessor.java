@@ -16,6 +16,7 @@ import io.quarkus.deployment.builditem.nativeimage.NativeImageResourceDirectoryB
 import io.quarkus.deployment.builditem.nativeimage.ReflectiveClassBuildItem;
 import io.quarkus.runtime.configuration.ConfigurationException;
 import io.quarkus.vertx.graphql.runtime.VertxGraphqlRecorder;
+import io.quarkus.vertx.http.deployment.RequireBodyHandlerBuildItem;
 import io.quarkus.vertx.http.deployment.RouteBuildItem;
 import io.quarkus.vertx.http.deployment.WebsocketSubProtocolsBuildItem;
 import io.quarkus.vertx.http.deployment.devmode.NotFoundPageDisplayableEndpointBuildItem;
@@ -25,7 +26,7 @@ import io.vertx.ext.web.handler.graphql.impl.GraphQLBatch;
 import io.vertx.ext.web.handler.graphql.impl.GraphQLQuery;
 
 class VertxGraphqlProcessor {
-    private static Pattern TRAILING_SLASH_SUFFIX_REGEX = Pattern.compile("/+$");
+    private static final Pattern TRAILING_SLASH_SUFFIX_REGEX = Pattern.compile("/+$");
 
     @BuildStep
     FeatureBuildItem feature() {
@@ -49,7 +50,7 @@ class VertxGraphqlProcessor {
     void registerVertxGraphqlUI(VertxGraphqlRecorder recorder,
             BuildProducer<NativeImageResourceDirectoryBuildItem> nativeResourcesProducer, VertxGraphqlConfig config,
             LaunchModeBuildItem launchMode, BuildProducer<NotFoundPageDisplayableEndpointBuildItem> displayableEndpoints,
-            BuildProducer<RouteBuildItem> routes) {
+            BuildProducer<RouteBuildItem> routes, BuildProducer<RequireBodyHandlerBuildItem> body) {
 
         boolean includeVertxGraphqlUi = launchMode.getLaunchMode().isDevOrTest() || config.ui.alwaysInclude;
         if (!includeVertxGraphqlUi) {
@@ -64,9 +65,12 @@ class VertxGraphqlProcessor {
                             + "\", this is not allowed as it blocks the application from serving anything else.");
         }
 
+        // Body handler required in Vert.x 4, to avoid DDOS attack.
+        body.produce(new RequireBodyHandlerBuildItem());
+
         Handler<RoutingContext> handler = recorder.handler(path);
-        routes.produce(new RouteBuildItem(path, handler));
-        routes.produce(new RouteBuildItem(path + "/*", handler));
+        routes.produce(RouteBuildItem.builder().route(path).handler(handler).build());
+        routes.produce(RouteBuildItem.builder().route(path + "/*").handler(handler).build());
         displayableEndpoints.produce(new NotFoundPageDisplayableEndpointBuildItem(path + "/"));
         nativeResourcesProducer.produce(new NativeImageResourceDirectoryBuildItem("io/vertx/ext/web/handler/graphiql"));
     }
